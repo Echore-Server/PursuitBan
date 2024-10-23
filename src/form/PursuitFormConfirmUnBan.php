@@ -17,12 +17,12 @@ class PursuitFormConfirmUnBan extends MenuForm {
 	public function __construct(private readonly int $id, PursuitBanData $data) {
 		$clientData = $data->getClientData();
 		$make = function(string $relyColor, string $firstKey, string $secondKey, string $content): string {
-			return "$relyColor$firstKey §f/ $relyColor{$secondKey}§7: §t{$content}§f";
+			return "{$relyColor}[!] §r$firstKey §f/ $relyColor{$secondKey}§7: §t{$content}§f";
 		};
 		parent::__construct(
 			"Pursuit UnBAN Confirmation",
 			join("\n", [
-				"§l§bUnBAN を実行します。よろしいですか？ / UnBan confirmation",
+				"§l§bUnBAN を実行します。よろしいですか？ / UnBan confirmation§r",
 				$make("§a", "プレイヤー名", "Player name", $clientData->getPlayerName()),
 				$make("§a", "プレイヤーUUID", "Player UUID", $clientData->getPlayerUuid()->toString()),
 				$make("§a", "XUID", "XUID", $clientData->getXuid()),

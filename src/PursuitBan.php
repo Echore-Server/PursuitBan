@@ -67,7 +67,7 @@ final class PursuitBan {
 	}
 
 	public static function prefix(string $message): string {
-		return "§tPursuit§8: " . $message;
+		return "§tPursuit§8: §f" . $message;
 	}
 
 	public static function init(PluginBase $plugin): void {
