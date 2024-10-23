@@ -7,7 +7,7 @@ namespace Echore\PursuitBan\data;
 use Ramsey\Uuid\UuidInterface;
 
 final class PursuitClientDataBuilder {
-	
+
 	private ?string $playerName;
 
 	private ?UuidInterface $playerUuid;
@@ -33,14 +33,7 @@ final class PursuitClientDataBuilder {
 	}
 
 	public function build(): ?PursuitClientData {
-		if (
-			$this->playerName === null ||
-			$this->playerUuid === null ||
-			$this->deviceId === null ||
-			$this->playFabId === null ||
-			$this->clientRandomId === null ||
-			$this->selfSignedId === null
-		) {
+		if ($this->isIncomplete()) {
 			return null;
 		}
 
@@ -53,6 +46,15 @@ final class PursuitClientDataBuilder {
 			$this->clientRandomId,
 			$this->selfSignedId
 		);
+	}
+
+	public function isIncomplete(): bool {
+		return $this->playerName === null ||
+			$this->playerUuid === null ||
+			$this->deviceId === null ||
+			$this->playFabId === null ||
+			$this->clientRandomId === null ||
+			$this->selfSignedId === null;
 	}
 
 	public function getPlayerName(): ?string {
