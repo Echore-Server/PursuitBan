@@ -17,7 +17,7 @@ class PursuitFormConfirmUnBan extends MenuForm {
 	public function __construct(private readonly int $id, PursuitBanData $data) {
 		$clientData = $data->getClientData();
 		$make = function(string $relyColor, string $firstKey, string $secondKey, string $content): string {
-			return "{$relyColor}[!] §r$firstKey §f/ $relyColor{$secondKey}§7: §t{$content}§f";
+			return "{$relyColor}[!] §r$firstKey §f/ {$secondKey}§7: §t{$content}§f";
 		};
 		parent::__construct(
 			"Pursuit UnBAN Confirmation",
