@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Echore\PursuitBan;
 
 use Closure;
+use Echore\PursuitBan\data\PursuitBanData;
 use Echore\PursuitBan\data\PursuitClientData;
 use Echore\PursuitBan\judger\PursuitJudger;
 use pocketmine\player\Player;
@@ -40,6 +41,8 @@ class PursuitCheck {
 
 	private ?Throwable $exception;
 
+	private ?PursuitBanData $resultBanData;
+
 	public function __construct(Player $player, PursuitBan $instance) {
 		$this->player = $player;
 		$this->instance = $instance;
@@ -51,6 +54,7 @@ class PursuitCheck {
 		$this->disconnectScreenMessage = null;
 		$this->kickEnabled = true;
 		$this->exception = null;
+		$this->resultBanData = null;
 
 		$this->onJudge = new ObjectSet();
 		$this->onException = new ObjectSet();
@@ -92,8 +96,16 @@ class PursuitCheck {
 		$this->quitMessage = $quitMessage;
 	}
 
+
 	/**
-	 * @return ObjectSet<Closure(PursuitCheck): void>
+	 * @return PursuitBanData|null
+	 */
+	public function getResultBanData(): ?PursuitBanData {
+		return $this->resultBanData;
+	}
+
+	/**
+	 * @return ObjectSet<Closure(PursuitCheck, PursuitBanData|null): void>
 	 */
 	public function getOnJudge(): ObjectSet {
 		return $this->onJudge;
@@ -131,7 +143,7 @@ class PursuitCheck {
 			throw new RuntimeException("Not running");
 		}
 	}
-	
+
 	public function isRunning(): bool {
 		return $this->running;
 	}
@@ -168,17 +180,16 @@ class PursuitCheck {
 	}
 
 	protected function onFinished(): void {
+		foreach (($this->exception === null ? $this->onJudge : $this->onException) as $hook) {
+			($hook)($this, $this->resultBanData);
+		}
+
 		if ($this->exception === null && $this->isFailed() && $this->kickEnabled) {
 			$this->player->kick(
 				"Pursuit Judger: " . $this->failureReason->getReason(),
 				$this->quitMessage,
 				$this->disconnectScreenMessage
 			);
-		}
-
-
-		foreach (($this->exception === null ? $this->onJudge : $this->onException) as $hook) {
-			($hook)($this);
 		}
 
 		$this->running = false;
@@ -224,8 +235,12 @@ class PursuitCheck {
 		return isset($this->pendingJudges[spl_object_hash($judger)]);
 	}
 
-	public function fail(string $reason): void {
+	public function fail(PursuitBanData $result, string $reason): void {
 		$this->checkRunning();
+		if ($this->resultBanData !== null) {
+			return;
+		}
+		$this->resultBanData = $result;
 		$this->failureReason = new PursuitCheckFailureReason($reason);
 	}
 }

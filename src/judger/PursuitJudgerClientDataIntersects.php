@@ -27,7 +27,7 @@ readonly class PursuitJudgerClientDataIntersects implements PursuitJudger {
 			}
 
 			if ($check->getClientData()->intersects($data->getClientData(), $this->relyLevel)) {
-				$check->fail("Client data intersects");
+				$check->fail($data, "Client data intersects");
 				break;
 			}
 		}
