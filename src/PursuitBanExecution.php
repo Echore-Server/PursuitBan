@@ -24,14 +24,14 @@ class PursuitBanExecution {
 
 	private bool $waitingPendingExecutions;
 
-	private bool $started;
+	private bool $running;
 
 	public function __construct(PursuitBanRequest $request, PursuitBanData $banData, PursuitBan $instance) {
 		$this->request = $request;
 		$this->banData = $banData;
 		$this->instance = $instance;
 		$this->pendingExecutions = [];
-		$this->started = false;
+		$this->running = false;
 		$this->waitingPendingExecutions = false;
 
 		$this->onExecute = new ObjectSet();
@@ -64,12 +64,12 @@ class PursuitBanExecution {
 	}
 
 	public function start(Closure $onExecute): void {
-		if ($this->started) {
+		if ($this->running) {
 			throw new RuntimeException("Already started");
 		}
 		$this->onExecute->add($onExecute);
 
-		$this->started = true;
+		$this->running = true;
 		$this->waitingPendingExecutions = false;
 
 		foreach ($this->instance->getExecutors() as $executor) {
@@ -90,12 +90,12 @@ class PursuitBanExecution {
 			($hook)($this);
 		}
 
-		$this->started = false;
+		$this->running = false;
 		$this->waitingPendingExecutions = false;
 	}
 
 	public function pend(PursuitExecutor $executor): void {
-		$this->checkStarted();
+		$this->checkRunning();
 		$hash = spl_object_hash($executor);
 		if (isset($this->pendingExecutions[$hash])) {
 			throw new RuntimeException("Execution {$executor->getName()} is already pending");
@@ -104,14 +104,18 @@ class PursuitBanExecution {
 		$this->pendingExecutions[$hash] = $executor;
 	}
 
-	private function checkStarted(): void {
-		if (!$this->started) {
-			throw new RuntimeException("Not started");
+	private function checkRunning(): void {
+		if (!$this->running) {
+			throw new RuntimeException("Not running");
 		}
+	}
+	
+	public function isRunning(): bool {
+		return $this->running;
 	}
 
 	public function settle(PursuitExecutor $executor): void {
-		$this->checkStarted();
+		$this->checkRunning();
 		$hash = spl_object_hash($executor);
 		if (!isset($this->pendingExecutions[$hash])) {
 			throw new RuntimeException("Execution {$executor->getName()} is not pending");

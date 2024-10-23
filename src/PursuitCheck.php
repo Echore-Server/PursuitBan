@@ -30,7 +30,7 @@ class PursuitCheck {
 
 	private bool $waitingPendingJudges;
 
-	private bool $started;
+	private bool $running;
 
 	private ?string $quitMessage;
 
@@ -45,7 +45,7 @@ class PursuitCheck {
 		$this->instance = $instance;
 		$this->failureReason = null;
 		$this->pendingJudges = [];
-		$this->started = false;
+		$this->running = false;
 		$this->waitingPendingJudges = false;
 		$this->quitMessage = null;
 		$this->disconnectScreenMessage = null;
@@ -121,15 +121,19 @@ class PursuitCheck {
 	}
 
 	public function getClientData(): PursuitClientData {
-		$this->checkStarted();
+		$this->checkRunning();
 
 		return $this->clientData;
 	}
 
-	private function checkStarted(): void {
-		if (!$this->started) {
-			throw new RuntimeException("Not started");
+	private function checkRunning(): void {
+		if (!$this->running) {
+			throw new RuntimeException("Not running");
 		}
+	}
+	
+	public function isRunning(): bool {
+		return $this->running;
 	}
 
 	public function getPlayer(): Player {
@@ -137,12 +141,12 @@ class PursuitCheck {
 	}
 
 	public function start(Closure $onJudge): void {
-		if ($this->started) {
+		if ($this->running) {
 			throw new RuntimeException("Already started");
 		}
 		$this->onJudge->add($onJudge);
 
-		$this->started = true;
+		$this->running = true;
 		$this->waitingPendingJudges = false;
 
 		try {
@@ -177,7 +181,7 @@ class PursuitCheck {
 			($hook)($this);
 		}
 
-		$this->started = false;
+		$this->running = false;
 		$this->waitingPendingJudges = false;
 	}
 
@@ -193,7 +197,7 @@ class PursuitCheck {
 	}
 
 	public function pend(PursuitJudger $judger): void {
-		$this->checkStarted();
+		$this->checkRunning();
 		$hash = spl_object_hash($judger);
 		if (isset($this->pendingJudges[$hash])) {
 			throw new RuntimeException("Judge {$judger->getName()} is already pending");
@@ -203,7 +207,7 @@ class PursuitCheck {
 	}
 
 	public function settle(PursuitJudger $judger): void {
-		$this->checkStarted();
+		$this->checkRunning();
 		$hash = spl_object_hash($judger);
 		if (!isset($this->pendingJudges[$hash])) {
 			throw new RuntimeException("Judge {$judger->getName()} is not pending");
@@ -221,7 +225,7 @@ class PursuitCheck {
 	}
 
 	public function fail(string $reason): void {
-		$this->checkStarted();
+		$this->checkRunning();
 		$this->failureReason = new PursuitCheckFailureReason($reason);
 	}
 }
