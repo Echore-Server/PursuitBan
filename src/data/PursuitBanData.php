@@ -104,6 +104,10 @@ class PursuitBanData implements JsonSerializable {
 		return $this;
 	}
 
+	public function isPermanent(): bool {
+		return $this->expiresAt === null;
+	}
+
 	public function getReason(): string {
 		return $this->reason;
 	}
