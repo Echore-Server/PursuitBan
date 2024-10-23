@@ -3,6 +3,18 @@
 基本的なクライアントデータ参照BANを行えるほか、<br>
 **検証**、 **実行**、 **解除**、**データ提供** を拡張できる総合的なBANプラグイン
 
+## コマンド
+
+### プレイヤー
+
+- `/pursuit ban <target: target>`
+- `/pursuit unban`
+
+### コンソール
+
+- `/pursuit ban <target: string> <reason: string> <executor: string> <years: int> <days: int> <permanent: bool>`
+- `/pursuit unban <target: string>`
+
 ## 検証の拡張
 
 そのプレイヤーがBANされているかどうかを確認する<br>
