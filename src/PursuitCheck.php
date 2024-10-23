@@ -216,6 +216,10 @@ class PursuitCheck {
 		}
 	}
 
+	public function isPending(PursuitJudger $judger): bool {
+		return isset($this->pendingJudges[spl_object_hash($judger)]);
+	}
+
 	public function fail(string $reason): void {
 		$this->checkStarted();
 		$this->failureReason = new PursuitCheckFailureReason($reason);

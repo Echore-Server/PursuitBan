@@ -37,6 +37,10 @@ class PursuitBanExecution {
 		$this->onExecute = new ObjectSet();
 	}
 
+	public function isPending(PursuitExecutor $executor): bool {
+		return isset($this->pendingExecutions[spl_object_hash($executor)]);
+	}
+
 	/**
 	 * @return ObjectSet<Closure>
 	 */
@@ -81,7 +85,7 @@ class PursuitBanExecution {
 
 	protected function onFinished(): void {
 		$this->instance->getBanRepository()->insert($this->banData);
-		
+
 		foreach ($this->onExecute as $hook) {
 			($hook)($this);
 		}
