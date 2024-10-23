@@ -1,0 +1,7 @@
+---
+name: PursuitBan
+version: 0.9.0
+main: Echore\PursuitBan\Main
+api: 5.19.0
+src-namespace-prefix: Echore\PursuitBan
+...
